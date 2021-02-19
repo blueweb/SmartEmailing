@@ -15,15 +15,10 @@ class SmartEmailing
 	const NODE_PING = 'ping';
 	const NODE_CHECK_CREDENTIALS = 'check-credentials';
 	const NODE_CONTACTLISTS = 'contactlists';
-	const NODE_CUSTOMFIELDS = 'customfields';
-	const NODE_CUSTOMFIELDS_OPTIONS = 'customfield-options';
-	const NODE_CONTACT_CUSTOMFIELDS = 'contact-customfields';
 	const NODE_CHANGE_EMAILADDRESS = 'change-emailaddress';
 	const NODE_CONTACT_FORGET = 'contacts/forget';
 	const NODE_CONTACTS = 'contacts';
 	const NODE_IMPORT = 'import';
-	const NODE_PURPOSES = 'purposes';
-	const NODE_PURPOSE_CONNECTIONS = 'purpose-connections';
 
 	const METHOD_GET = 'GET';
 	const METHOD_POST = 'POST';
@@ -192,18 +187,18 @@ class SmartEmailing
 	/**
 	 * https://app.smartemailing.cz/docs/api/v3/index.html#api-Import-Import_contacts
 	 *
-	 * @param $email
 	 * @param array|NULL $contactLists
 	 * @param array|NULL $properties
 	 * @param array|NULL $customFields
 	 * @param array|NULL $purposes
 	 * @param array|NULL $settings
 	 */
-	public function importContact($email, array $contactLists = NULL, array $properties = NULL, array $customFields = NULL, array $purposes = NULL, array $settings = NULL)
+	public function importContact(array $contactLists = NULL, array $properties = NULL, array $customFields = NULL, array $purposes = NULL, array $settings = NULL)
 	{
-		$contact = [
-			'emailaddress' => $email,
-		];
+		$contact = [];
+		if(is_array($properties)) {
+			$contact = $properties;
+		}
 
 		if (is_array($contactLists)) {
 			$contact['contactlists'] = [];
@@ -215,12 +210,6 @@ class SmartEmailing
 			}
 		}
 
-		if (is_array($properties)) {
-			foreach ($properties as $name => $value) {
-				$contact[$name] = $value;
-			}
-		}
-
 		if (is_array($customFields)) {
 			$contact['customfields'] = $customFields;
 		}
@@ -229,15 +218,12 @@ class SmartEmailing
 			$contact['purposes'] = $purposes;
 		}
 
-		$data = [
-			'data' => [
-				$contact,
-			],
-		];
+		$data['data'][] = $contact;
 
 		if (is_array($settings)) {
 			$data['settings'] = $settings;
 		}
+
 
 		return $this->call(self::METHOD_POST, self::NODE_IMPORT, $data);
 	}
